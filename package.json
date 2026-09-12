@@ -1,0 +1,18 @@
+{
+  "name": "recipe-scale-fmt",
+  "version": "0.1.0",
+  "description": "Normalizes messy recipe ingredient lists and scales quantities",
+  "type": "module",
+  "bin": {
+    "recipe-scale-fmt": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cli.js"
+  },
+  "license": "MIT",
+  "author": "tidal-husk3",
+  "engines": {
+    "node": ">=18"
+  }
+}
