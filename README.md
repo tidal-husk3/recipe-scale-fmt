@@ -31,14 +31,20 @@ $ cat ingredients.txt | recipe-scale-fmt --scale 1.5
 ```
 
 Input is one ingredient per line. Messy spacing is collapsed, and quantities
-can be written as plain integers, decimals, simple fractions (`1/2`), or
-mixed numbers (`1 1/2`):
+can be written as plain integers, decimals, simple fractions (`1/2`), mixed
+numbers (`1 1/2`), or unicode vulgar fractions (`½`, `1½`, `1 ½`):
 
 ```
 $ printf '  2   cups   flour\n1/2 tsp salt\n1 1/2 lb  butter\n' | recipe-scale-fmt
 2 cup flour
 0.5 tsp salt
 1.5 lb butter
+```
+
+```
+$ printf '¾ cup sugar\n1½ tsp vanilla\n' | recipe-scale-fmt
+0.75 cup sugar
+1.5 tsp vanilla
 ```
 
 Lines that don't start with a recognized quantity are passed through as-is

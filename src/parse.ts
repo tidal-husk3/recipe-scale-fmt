@@ -48,14 +48,55 @@ function parseFractionToken(token: string): number | null {
   return Number(match[1]) / denominator
 }
 
+// Unicode vulgar fraction characters, as they show up when pasting from a
+// blog or a PDF that renders "1/2" as a single glyph.
+const VULGAR_FRACTIONS: Record<string, number> = {
+  '¼': 1 / 4,
+  '½': 1 / 2,
+  '¾': 3 / 4,
+  '⅐': 1 / 7,
+  '⅑': 1 / 9,
+  '⅒': 1 / 10,
+  '⅓': 1 / 3,
+  '⅔': 2 / 3,
+  '⅕': 1 / 5,
+  '⅖': 2 / 5,
+  '⅗': 3 / 5,
+  '⅘': 4 / 5,
+  '⅙': 1 / 6,
+  '⅚': 5 / 6,
+  '⅛': 1 / 8,
+  '⅜': 3 / 8,
+  '⅝': 5 / 8,
+  '⅞': 7 / 8,
+}
+
+const VULGAR_FRACTION_CHARS = Object.keys(VULGAR_FRACTIONS).join('')
+const MIXED_VULGAR_PATTERN = new RegExp(`^(\\d+)\\s*([${VULGAR_FRACTION_CHARS}])`)
+const VULGAR_PATTERN = new RegExp(`^[${VULGAR_FRACTION_CHARS}]`)
+
 interface QuantityMatch {
   value: number
   length: number
 }
 
-// Handles "2", "1.5", "1/2", and mixed numbers like "1 1/2", in that order
-// because the mixed case has to be tried before the plain fraction case.
+// Handles "2", "1.5", "1/2", mixed numbers like "1 1/2", and vulgar fraction
+// glyphs like "½" or "1½", in that order because the mixed and vulgar cases
+// have to be tried before the plain digit fraction and decimal cases.
 function parseQuantity(text: string): QuantityMatch | null {
+  const mixedVulgar = text.match(MIXED_VULGAR_PATTERN)
+  if (mixedVulgar) {
+    return {
+      value: Number(mixedVulgar[1]) + VULGAR_FRACTIONS[mixedVulgar[2]],
+      length: mixedVulgar[0].length,
+    }
+  }
+
+  const vulgar = text.match(VULGAR_PATTERN)
+  if (vulgar) {
+    return { value: VULGAR_FRACTIONS[vulgar[0]], length: vulgar[0].length }
+  }
+
   const mixed = text.match(/^(\d+)\s+(\d+\/\d+)/)
   if (mixed) {
     const fraction = parseFractionToken(mixed[2])
